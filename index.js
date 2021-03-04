@@ -1,5 +1,6 @@
 const express = require('express')
 const MongoClient = require('mongodb').MongoClient
+const ObjectId = require('mongodb').ObjectId
 const app = express()
 
 app.use(express.json())
@@ -16,17 +17,14 @@ async function connect(){
 }
 connect()
 
-app.get('/books/:id', (req, res) =>{
+app.get('/books/:id', async (req, res) =>{
     //input
     let id = req.params.id
-    console.log(`id: ${id}`)
+    
+    //process*
+    const book = await bookscollection.findOne({ _id: ObjectId(id)})
 
-    let book = {}
-
-    //process
-    book = books[id]
-
-    //output
+    //output*
     res.status(200).json(book)
 })
 
