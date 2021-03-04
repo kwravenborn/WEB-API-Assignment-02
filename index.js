@@ -1,11 +1,23 @@
 const express = require('express')
+const MongoClient = require('mongodb').MongoClient
 const app = express()
 
 app.use(express.json())
 let books = []
 
+const url = 'mongodb+srv://superAdmin:palmza551@cluster0.aoswi.mongodb.net/storebook?retryWrites=true&w=majority'
+const client = new MongoClient(url, { useNewUrlParser: true, useUnifiedTopology: true })
+let db,bookscollection
+
+async function connect(){
+    await client.connect()
+    db = client.db('storebook')
+    bookscollection = db.collection('books')
+}
+connect()
+
 app.get('/books/:id', (req, res) =>{
-    //input*
+    //input
     let id = req.params.id
     console.log(`id: ${id}`)
 
@@ -18,9 +30,9 @@ app.get('/books/:id', (req, res) =>{
     res.status(200).json(book)
 })
 
-app.post('/books', (req, res) => { 
+app.post('/books', async (req, res) => { 
 
-    //input*
+    //input
     let title = req.body.title
     let price = req.body.price
     let unit = req.body.unit
@@ -37,10 +49,10 @@ app.post('/books', (req, res) => {
     let booksID = 0
 
     //process
-    books.push(newBook)
-    booksID = books.length - 1
+    const result = await bookscollection.insertOne(newBook)
+    booksID = result.insertedId
 
-    //output*
+    //output
     res.status(201).json(booksID)
 })
 
